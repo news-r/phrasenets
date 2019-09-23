@@ -1,0 +1,38 @@
+---
+title: "Get Started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{get_started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The premise of `phrasenets` is very simple: to help you build "phrase nets." These are very easy, in fact, if you know your way around you probably won't need this package at all.
+
+## What are "phrase nets"
+
+It's almost too simple, it connects words according to "connectors" of your choosing, e.g.:
+
+- "A to B"
+- "A and B"
+- "B at C"
+
+```{r setup}
+library(phrasenets)
+
+data(reuters)
+
+reuters %>% 
+  phrase_net(text) %>% 
+  dplyr::filter(preceding != "the") %>% 
+  dplyr::filter(following != "the") %>% 
+  dplyr::filter(occurences > quantile(occurences, .75)) %>% 
+  plot_sigmajs()
+```

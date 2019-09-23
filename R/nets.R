@@ -2,30 +2,66 @@
 #' 
 #' Create phrase network.
 #' 
-#' @import purr
+#' @param data A data.frame or \link[tibble]{tibble} containig \code{text}.
+#' @param text Bare column name containing text.
+#' @param connectors Words that establish connections between words and 
+#' ultimately form edges.
+#' 
+#' @examples
+#' phrase_net(reuters, text)
+#' 
+#' @import dplyr
+#' @import assertthat
 #' 
 #' @export
-phrase_net <- function(text, id = NULL) UseMethod("phrase_net")
+phrase_net <- function(data, text, connectors = c("to", "in", "at", "and", "of")) UseMethod("phrase_net")
 
-#' @pexport
-#' @method phrase_net default
-phrase_net.default <- function(text, id = NULL){
-  if(!is.null(id))
-    text$id <- id
-  else
-    text <- purrr::map2(
-      text, 
-      1:length(text), 
-      function(x, y){
-        x$id <- y
-        return(x)
-      }
-    )
+#' @export
+phrase_net.default <- function(data, text, connectors = c("to", "in", "at", "and", "of")){
+  assert_that(!missing(text), msg = "Missing `text` column.")
+
+  text_enquo <- enquo(text)
+  text <- select(data, text = !!text_enquo)
+
+  if(!"id" %in% names(text))
+    text$id <- 1:nrow(text)
+
+  data %>% 
+    tidytext::unnest_tokens(word, text) %>% 
+    mutate(
+      is_connector = word %in% connectors,
+      preceding = lag(word),
+      following = lead(word)
+    ) %>% 
+    filter(is_connector == TRUE) %>% 
+    count(preceding, following, name = "occurences") %>% 
+    construct_net()
 }
 
-#' @pexport
-#' @method phrase_net data.frame
-phrase_net.data.frame <- function(text, id = NULL){
-  text <- apply(text, 1, as.list)
-  phrase_net(text)
+#' Plot sigmajs
+#' 
+#' @param net An object of class \code{phrasenet} as returned by \code{\link{phrase_net}}.
+#' 
+#' @examples
+#' phrase_net(reuters, text) %>% 
+#'   dplyr::filter(n > 1) %>% 
+#'   plot_sigmajs()
+#' 
+#' @export
+plot_sigmajs <- function(net) UseMethod("plot_sigmajs")
+
+#' @export
+plot_sigmajs.default <- function(net){
+  net$id <- 1:nrow(net)
+  nodes <- tibble::tibble(
+    id = c(net$preceding, net$following)
+  ) %>% 
+    count(id) %>% 
+    mutate(label = id)
+
+  sigmajs::sigmajs() %>% 
+    sigmajs::sg_nodes(nodes, id, size = n, label) %>% 
+    sigmajs::sg_edges(net, id, source = preceding, target = following) %>% 
+    sigmajs::sg_layout() %>% 
+    sigmajs::sg_neighbours()
 }
