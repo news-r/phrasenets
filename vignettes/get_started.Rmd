@@ -31,8 +31,7 @@ data(reuters)
 
 reuters %>% 
   phrase_net(text) %>% 
-  dplyr::filter(preceding != "the") %>% 
-  dplyr::filter(following != "the") %>% 
+  filter_net(c("a", "the")) %>% 
   dplyr::filter(occurences > quantile(occurences, .75)) %>% 
   plot_sigmajs()
 ```

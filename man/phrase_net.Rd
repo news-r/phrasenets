@@ -18,6 +18,7 @@ ultimately form edges.}
 Create phrase network.
 }
 \examples{
+data(reuters)
 phrase_net(reuters, text)
 
 }

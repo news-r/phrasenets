@@ -8,6 +8,7 @@
 #' ultimately form edges.
 #' 
 #' @examples
+#' data(reuters)
 #' phrase_net(reuters, text)
 #' 
 #' @import dplyr
@@ -38,13 +39,37 @@ phrase_net.default <- function(data, text, connectors = c("to", "in", "at", "and
     construct_net()
 }
 
+#' Filter Net
+#' 
+#' Filter edges that contain specific words.
+#' 
+#' @inheritParams plot_sigmajs
+#' @param words Vector or words to remove edges.
+#' 
+#' @examples
+#' data(reuters)
+#' phrase_net(reuters, text) %>% 
+#'   filter_net(c("a", "the"))
+#' 
+#' @export
+filter_net <- function(net, words) UseMethod("filter_net")
+
+#' @export
+filter_net.default <- function(net, words){
+  assert_that(!missing(words), msg = "Missing `words` vector.")
+
+  net %>% 
+    dplyr::filter(!preceding %in% words) %>%
+    dplyr::filter(!following %in% words) 
+}
+
 #' Plot sigmajs
 #' 
 #' @param net An object of class \code{phrasenet} as returned by \code{\link{phrase_net}}.
 #' 
 #' @examples
+#' data(reuters)
 #' phrase_net(reuters, text) %>% 
-#'   dplyr::filter(n > 1) %>% 
 #'   plot_sigmajs()
 #' 
 #' @export
