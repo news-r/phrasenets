@@ -1,0 +1,67 @@
+<!-- badges go here -->
+[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/JohnCoene)
+<!-- badges: end -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(htmltools)
+```
+
+```{r, echo=FALSE}
+br()
+br()
+
+div(
+  class = "row",
+  div(
+    class = "col-md-4",
+    img(
+      src = "logo.png",
+      class = "img-responsive responsive-img"
+    )
+  ),
+  div(
+    class = "col-md-8",
+    p(
+      "phrasenets."
+    ),
+    p(
+      tags$a(
+        tags$i(class = "fa fa-rocket"),
+        class = "btn btn-primary",
+        href = "articles/get_started.html",
+        style = "margin-bottom: 5px;",
+        "Get Started"
+      )
+    )
+  )
+)
+```
+
+## Installation
+
+You can install the package with `remotes` from Github, see [changes](news/index.html).
+
+```{r, eval=FALSE}
+# install.packages("remotes")
+remotes::install_github("news-r/phrasenets") # github
+```
+
+## Example
+
+```{r}
+library(phrasenets)
+
+data(reuters)
+
+reuters %>% 
+  phrase_net(text) %>% 
+  filter_net(c("a", "the")) %>% 
+  dplyr::filter(occurences > 5) %>% 
+  plot_sigmajs()
+```

@@ -2,3 +2,4 @@
 ^data-raw$
 ^_pkgdown\.yml$
 vignettes
+^index\.Rmd$
