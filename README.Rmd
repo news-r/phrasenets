@@ -1,0 +1,68 @@
+---
+output: 
+  github_document:
+    html_preview: false
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.org/news-r/phrasenets.svg?branch=master)](https://travis-ci.org/news-r/phrasenets)
+<!-- badges: end -->
+
+# phrasenets
+
+Phrasenets lets you build (very) simple but interpretable and insightful phrase networks, see the website for [more details](https://phrasenets.news-r.org/) on their nature.
+
+## Installation
+
+You can install the  packages from Github with:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("news-r/phrasenets")
+```
+
+## Example
+
+```{r example}
+library(dplyr)
+library(purrr)
+library(ggraph)
+library(tidygraph)
+library(phrasenets)
+
+data(reuters)
+
+# create a graph for each commodity
+subgraphs <- reuters %>% 
+  group_split(category) %>% 
+  map(phrase_net, text = text) %>% 
+  map(filter_net, c("a", "the")) %>% 
+  map(filter, occurences > 1) %>% 
+  map(as_tbl_graph) %>% 
+  map(function(x){
+    mutate(x, size = centrality_degree())
+  })
+
+plot_it <- function(g, commodity){
+  ggraph(g, layout = 'kk') + 
+    geom_edge_fan(show.legend = FALSE) + 
+    geom_node_point(aes(size = size, colour = size), show.legend = FALSE) + 
+    labs(caption = tools::toTitleCase(commodity))
+} 
+
+commodities <- unique(reuters$category)
+
+map2(subgraphs, commodities, plot_it) %>% 
+  patchwork::wrap_plots(ncol = 2)
+```

@@ -1,5 +1,6 @@
 <!-- badges go here -->
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/JohnCoene)
+[![Travis build status](https://travis-ci.org/news-r/phrasenets.svg?branch=master)](https://travis-ci.org/news-r/phrasenets)
 <!-- badges: end -->
 
 ```{r setup, include = FALSE}
@@ -28,7 +29,7 @@ div(
   div(
     class = "col-md-8",
     p(
-      "Create phrase networks."
+      "Create simple but interpretable phrase networks."
     ),
     p(
       tags$a(
