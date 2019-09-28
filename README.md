@@ -23,9 +23,23 @@ Example
 
 ``` r
 library(dplyr)
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
 library(purrr)
 library(ggraph)
+#> Loading required package: ggplot2
 library(tidygraph)
+#> 
+#> Attaching package: 'tidygraph'
+#> The following object is masked from 'package:stats':
+#> 
+#>     filter
 library(phrasenets)
 
 data(reuters)
@@ -54,4 +68,4 @@ map2(subgraphs, commodities, plot_it) %>%
   patchwork::wrap_plots(ncol = 2)
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />

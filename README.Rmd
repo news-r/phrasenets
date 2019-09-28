@@ -34,7 +34,7 @@ remotes::install_github("news-r/phrasenets")
 
 ## Example
 
-```{r example}
+```{r fig.height=9}
 library(dplyr)
 library(purrr)
 library(ggraph)
