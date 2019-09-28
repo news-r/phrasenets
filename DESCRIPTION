@@ -21,3 +21,5 @@ Imports:
     tidytext,
     magrittr,
     assertthat
+Suggests:
+    shiny
