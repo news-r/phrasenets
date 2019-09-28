@@ -16,7 +16,7 @@ Filter edges that contain specific words.
 }
 \examples{
 data(reuters)
-phrase_net(reuters, text) \%>\% 
+phrase_net(reuters, text = text) \%>\% 
   filter_net(c("a", "the"))
 
 }

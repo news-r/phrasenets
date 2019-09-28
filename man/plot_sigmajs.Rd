@@ -14,7 +14,7 @@ Plot sigmajs
 }
 \examples{
 data(reuters)
-phrase_net(reuters, text) \%>\% 
+phrase_net(reuters, text = text) \%>\% 
   plot_sigmajs()
 
 }

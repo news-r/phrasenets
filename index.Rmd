@@ -60,7 +60,7 @@ library(phrasenets)
 data(reuters)
 
 reuters %>% 
-  phrase_net(text) %>% 
+  phrase_net(text = text) %>% 
   filter_net(c("a", "the")) %>% 
   dplyr::filter(occurences > 5) %>% 
   plot_sigmajs()

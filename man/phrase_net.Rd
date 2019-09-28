@@ -4,21 +4,24 @@
 \alias{phrase_net}
 \title{Phrase Net}
 \usage{
-phrase_net(data, text, connectors = c("to", "in", "at", "and", "of"))
+phrase_net(data, connectors = c("to", "in", "at", "and", "of"), ...)
 }
 \arguments{
 \item{data}{A data.frame or \link[tibble]{tibble} containig \code{text}.}
 
-\item{text}{Bare column name containing text.}
-
 \item{connectors}{Words that establish connections between words and 
 ultimately form edges.}
+
+\item{...}{Arguments to pass to method, namely \code{text}.}
 }
 \description{
 Create phrase network.
 }
 \examples{
 data(reuters)
-phrase_net(reuters, text)
+net1 <- phrase_net(reuters, text = text)
+net2 <- phrase_net(reuters$text)
+
+identical(net1, net2)
 
 }

@@ -24,13 +24,27 @@ It's almost too simple, it connects words according to "connectors" of your choo
 - "A and B"
 - "B at C"
 
+The default connectors are `to`, `in`, `at`, `and`, and `of`.
+
+# Examples
+
+The `phrase_net` function simply returns a lsit of edges and the number of times these were found in the body of text.
+
 ```{r setup}
 library(phrasenets)
 
 data(reuters)
 
+phrase_net(reuters, text = text) %>% 
+  head() %>% 
+  knitr::kable()
+```
+
+The package also comes with a convenience function `filter_net` to filter out any edges that contains specific words. Below we remove edges with `the` and `a` and use the `plot_sigmajs` to easily plot the network using [sigmajs](http://sigmajs.john-coene.com/).
+
+```{r}
 reuters %>% 
-  phrase_net(text) %>% 
+  phrase_net(text = text) %>% 
   filter_net(c("a", "the")) %>% 
   dplyr::filter(occurences > 5) %>% 
   plot_sigmajs()

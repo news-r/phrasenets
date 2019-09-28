@@ -3,29 +3,47 @@
 #' Create phrase network.
 #' 
 #' @param data A data.frame or \link[tibble]{tibble} containig \code{text}.
-#' @param text Bare column name containing text.
 #' @param connectors Words that establish connections between words and 
 #' ultimately form edges.
+#' @param ... Arguments to pass to method, namely \code{text}.
 #' 
 #' @examples
 #' data(reuters)
-#' phrase_net(reuters, text)
+#' net1 <- phrase_net(reuters, text = text)
+#' net2 <- phrase_net(reuters$text)
+#' 
+#' identical(net1, net2)
 #' 
 #' @import dplyr
 #' @import assertthat
 #' 
 #' @export
-phrase_net <- function(data, text, connectors = c("to", "in", "at", "and", "of")) UseMethod("phrase_net")
+phrase_net <- function(data, connectors = c("to", "in", "at", "and", "of"), ...) UseMethod("phrase_net")
 
 #' @export
-phrase_net.default <- function(data, text, connectors = c("to", "in", "at", "and", "of")){
+phrase_net.default <- function(data, connectors = c("to", "in", "at", "and", "of"), ...){
+
+  data <- tibble::tibble(text = data)
+
+  data %>% 
+    tidytext::unnest_tokens(word, text) %>% 
+    mutate(
+      is_connector = word %in% connectors,
+      preceding = lag(word),
+      following = lead(word)
+    ) %>% 
+    filter(is_connector == TRUE) %>% 
+    count(preceding, following, name = "occurences") %>% 
+    construct_net()
+}
+
+#' @export
+#' @method phrase_net data.frame
+phrase_net.data.frame <- function(data, connectors = c("to", "in", "at", "and", "of"), ..., text){
   assert_that(!missing(text), msg = "Missing `text` column.")
 
   text_enquo <- enquo(text)
-  text <- select(data, text = !!text_enquo)
-
-  if(!"id" %in% names(text))
-    text$id <- 1:nrow(text)
+  data <- select(data, text = !!text_enquo)
 
   data %>% 
     tidytext::unnest_tokens(word, text) %>% 
@@ -48,7 +66,7 @@ phrase_net.default <- function(data, text, connectors = c("to", "in", "at", "and
 #' 
 #' @examples
 #' data(reuters)
-#' phrase_net(reuters, text) %>% 
+#' phrase_net(reuters, text = text) %>% 
 #'   filter_net(c("a", "the"))
 #' 
 #' @export
@@ -69,7 +87,7 @@ filter_net.default <- function(net, words){
 #' 
 #' @examples
 #' data(reuters)
-#' phrase_net(reuters, text) %>% 
+#' phrase_net(reuters, text = text) %>% 
 #'   plot_sigmajs()
 #' 
 #' @export
@@ -88,5 +106,6 @@ plot_sigmajs.default <- function(net){
     sigmajs::sg_nodes(nodes, id, size = n, label) %>% 
     sigmajs::sg_edges(net, id, source = preceding, target = following) %>% 
     sigmajs::sg_layout() %>% 
+    sigmajs::sg_cluster(colors = c("#247BA0", "#70C1B3", "#B2DBBF", "#F3FFBD", "#FF1654")) %>% 
     sigmajs::sg_neighbours()
 }
