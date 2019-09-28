@@ -49,3 +49,42 @@ reuters %>%
   dplyr::filter(occurences > 5) %>% 
   plot_sigmajs()
 ```
+
+The dataset provided (`reuters`) contains articles on 10 difference commodities, let's plot their respective phrasenets.
+
+```{r, fig.width=9,fig.height=12}
+library(dplyr)
+library(purrr)
+library(ggraph)
+library(tidygraph)
+
+# create a graph for each commodity
+subgraphs <- reuters %>% 
+  group_split(category) %>% 
+  map(phrase_net, text = text) %>% 
+  map(filter_net, c("a", "the")) %>% 
+  map(filter, occurences > 1) %>% 
+  map(as_tbl_graph) %>% 
+  map(function(x){
+    mutate(x, size = centrality_degree())
+  })
+
+plot_it <- function(g, commodity){
+  ggraph(g, layout = 'kk') + 
+    geom_edge_fan(show.legend = FALSE) + 
+    geom_node_point(aes(size = size, colour = size), show.legend = FALSE) + 
+    theme_graph(
+      background = "#f9f7f1"
+    ) +
+    labs(caption = tools::toTitleCase(commodity))
+} 
+
+commodities <- unique(reuters$category)
+
+map2(subgraphs, commodities, plot_it) %>% 
+  patchwork::wrap_plots(ncol = 2) &
+  theme(
+    panel.background = element_rect(fill = "#f9f7f1"),
+    plot.background = element_rect(fill = "#f9f7f1")
+  )
+```
