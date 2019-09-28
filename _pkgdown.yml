@@ -1,6 +1,21 @@
 template:
   package: newsrdown
 
+navbar:
+  title: "phrasenets"
+  left:
+    - text: "Reference"
+      href: "reference/"
+    - text: "Get Started"
+      href: "articles/get_started.html"
+  right:
+    - icon: fa-balance-scale
+      href: LICENSE.html
+    - icon: fa-newspaper-o
+      href: news/index.html
+    - icon: fa-github fa-lg
+      href: "https://github.com/news-r/phrasenets"
+
 authors:
   John Coene:
     href: http://john-coene.com
