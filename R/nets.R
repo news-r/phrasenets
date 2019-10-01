@@ -95,7 +95,11 @@ plot_sigmajs <- function(net) UseMethod("plot_sigmajs")
 
 #' @export
 plot_sigmajs.default <- function(net){
-  net$id <- 1:nrow(net)
+  net <- net %>% 
+    dplyr::mutate(
+      id = 1:dplyr::n(),
+      type = "curvedArrow"
+    )
   nodes <- tibble::tibble(
     id = c(net$preceding, net$following)
   ) %>% 
@@ -104,8 +108,21 @@ plot_sigmajs.default <- function(net){
 
   sigmajs::sigmajs() %>% 
     sigmajs::sg_nodes(nodes, id, size = n, label) %>% 
-    sigmajs::sg_edges(net, id, source = preceding, target = following) %>% 
+    sigmajs::sg_edges(
+      net, 
+      id, 
+      source = preceding, 
+      target = following, 
+      size = occurences, 
+      type
+    ) %>% 
     sigmajs::sg_layout() %>% 
+    sigmajs::sg_drag_nodes() %>% 
     sigmajs::sg_cluster(colors = c("#247BA0", "#70C1B3", "#B2DBBF", "#F3FFBD", "#FF1654")) %>% 
-    sigmajs::sg_neighbours()
+    sigmajs::sg_neighbours() %>% 
+    sigmajs::sg_settings(
+      edgeLabelSize = "proportional",
+      minEdgeSize = 1,
+      maxEdgeSize = 3
+    )
 }

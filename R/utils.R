@@ -1,3 +1,6 @@
 globalVariables(
-  c("following", "is_connector", "preceding", "label", "word", "text")
+  c(
+    "occurences", "following", "is_connector", "preceding", 
+    "label", "word", "text", "type"
+  )
 )
