@@ -36,7 +36,9 @@ phrase_net.default <- function(data, connectors = c("to", "in", "at", "and", "of
       preceding = lag(connector),
       following = lead(connector)
     ) %>% 
-    filter(is_connector == TRUE)
+    filter(is_connector == TRUE) %>% 
+    filter(!is.na(preceding)) %>% 
+    filter(!is.na(following))
 
   if(keep_connector)
     net <- count(net, preceding, connector, following, name = "occurences")
@@ -62,7 +64,9 @@ phrase_net.data.frame <- function(data, connectors = c("to", "in", "at", "and", 
       preceding = lag(connector),
       following = lead(connector)
     ) %>% 
-    filter(is_connector == TRUE)
+    filter(is_connector == TRUE) %>% 
+    filter(!is.na(preceding)) %>% 
+    filter(!is.na(following))
 
   if(keep_connector)
     net <- count(net, preceding, connector, following, name = "occurences")
