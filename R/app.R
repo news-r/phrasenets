@@ -8,7 +8,6 @@
 #' 
 #' @export
 phrasenets_app <- function() {
-  "app/app.R" %>% 
-    system.file(package = 'phrasenets') %>% 
+  system.file("app/app.R", package = 'phrasenets') %>% 
     shiny::shinyAppFile()
 }
