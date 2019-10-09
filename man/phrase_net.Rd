@@ -4,13 +4,21 @@
 \alias{phrase_net}
 \title{Phrase Net}
 \usage{
-phrase_net(data, connectors = c("to", "in", "at", "and", "of"), ...)
+phrase_net(
+  data,
+  connectors = c("to", "in", "at", "and", "of"),
+  keep_connector = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{A data.frame or \link[tibble]{tibble} containig \code{text}.}
 
 \item{connectors}{Words that establish connections between words and 
 ultimately form edges.}
+
+\item{keep_connector}{Whether to include the connecting terms 
+(\code{connectors}) in the edgelist returned.}
 
 \item{...}{Arguments to pass to method, namely \code{text}.}
 }

@@ -5,6 +5,8 @@
 #' @param data A data.frame or \link[tibble]{tibble} containig \code{text}.
 #' @param connectors Words that establish connections between words and 
 #' ultimately form edges.
+#' @param keep_connector Whether to include the connecting terms 
+#' (\code{connectors}) in the edgelist returned.
 #' @param ... Arguments to pass to method, namely \code{text}.
 #' 
 #' @examples
@@ -18,43 +20,56 @@
 #' @import assertthat
 #' 
 #' @export
-phrase_net <- function(data, connectors = c("to", "in", "at", "and", "of"), ...) UseMethod("phrase_net")
+phrase_net <- function(data, connectors = c("to", "in", "at", "and", "of"), 
+  keep_connector = FALSE, ...) UseMethod("phrase_net")
 
 #' @export
-phrase_net.default <- function(data, connectors = c("to", "in", "at", "and", "of"), ...){
+phrase_net.default <- function(data, connectors = c("to", "in", "at", "and", "of"),
+  keep_connector = FALSE, ...){
 
   data <- tibble::tibble(text = data)
 
-  data %>% 
-    tidytext::unnest_tokens(word, text) %>% 
+  net <- data %>% 
+    tidytext::unnest_tokens(connector, text) %>% 
     mutate(
-      is_connector = word %in% connectors,
-      preceding = lag(word),
-      following = lead(word)
+      is_connector = connector %in% connectors,
+      preceding = lag(connector),
+      following = lead(connector)
     ) %>% 
-    filter(is_connector == TRUE) %>% 
-    count(preceding, following, name = "occurences") %>% 
-    construct_net()
+    filter(is_connector == TRUE)
+
+  if(keep_connector)
+    net <- count(net, preceding, connector, following, name = "occurences")
+  else
+    net <- count(net, preceding, following, name = "occurences")
+  
+  construct_net(net)
 }
 
 #' @export
 #' @method phrase_net data.frame
-phrase_net.data.frame <- function(data, connectors = c("to", "in", "at", "and", "of"), ..., text){
+phrase_net.data.frame <- function(data, connectors = c("to", "in", "at", "and", "of"),
+  keep_connector = FALSE, ..., text){
   assert_that(!missing(text), msg = "Missing `text` column.")
 
   text_enquo <- enquo(text)
   data <- select(data, text = !!text_enquo)
 
-  data %>% 
-    tidytext::unnest_tokens(word, text) %>% 
+  net <- data %>% 
+    tidytext::unnest_tokens(connector, text) %>% 
     mutate(
-      is_connector = word %in% connectors,
-      preceding = lag(word),
-      following = lead(word)
+      is_connector = connector %in% connectors,
+      preceding = lag(connector),
+      following = lead(connector)
     ) %>% 
-    filter(is_connector == TRUE) %>% 
-    count(preceding, following, name = "occurences") %>% 
-    construct_net()
+    filter(is_connector == TRUE)
+
+  if(keep_connector)
+    net <- count(net, preceding, connector, following, name = "occurences")
+  else
+    net <- count(net, preceding, following, name = "occurences")
+  
+  construct_net(net)
 }
 
 #' Filter Net
@@ -78,7 +93,8 @@ filter_net.default <- function(net, words){
 
   net %>% 
     dplyr::filter(!preceding %in% words) %>%
-    dplyr::filter(!following %in% words) 
+    dplyr::filter(!following %in% words) %>% 
+    construct_net()
 }
 
 #' Plot sigmajs
@@ -87,24 +103,33 @@ filter_net.default <- function(net, words){
 #' 
 #' @examples
 #' data(reuters)
-#' phrase_net(reuters, text = text) %>% 
+#' 
+#' \dontrun{
+#' phrase_net(reuters$text[1:10]) %>% 
 #'   plot_sigmajs()
+#' }
 #' 
 #' @export
 plot_sigmajs <- function(net) UseMethod("plot_sigmajs")
 
 #' @export
-plot_sigmajs.default <- function(net){
-  net <- net %>% 
-    dplyr::mutate(
-      id = 1:dplyr::n(),
-      type = "curvedArrow"
-    )
+plot_sigmajs.phrasenet <- function(net){
+  net$connector <- NULL
+
   nodes <- tibble::tibble(
     id = c(net$preceding, net$following)
   ) %>% 
     count(id) %>% 
     mutate(label = id)
+
+  net <- net %>% 
+    dplyr::group_by(preceding, following) %>% 
+    dplyr::summarise(occurences = sum(occurences)) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::mutate(
+      id = 1:dplyr::n(),
+      type = "curvedArrow"
+    )
 
   sigmajs::sigmajs() %>% 
     sigmajs::sg_nodes(nodes, id, size = n, label) %>% 

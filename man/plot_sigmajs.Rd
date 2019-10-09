@@ -14,7 +14,10 @@ Plot sigmajs
 }
 \examples{
 data(reuters)
-phrase_net(reuters, text = text) \%>\% 
+
+\dontrun{
+phrase_net(reuters$text[1:10]) \%>\% 
   plot_sigmajs()
+}
 
 }
